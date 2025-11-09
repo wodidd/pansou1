@@ -318,3 +318,16 @@ MCP 服务通过工具调用接收参数。以下是主要工具及其支持的�
 | `PROJECT_ROOT_PATH`    | PanSou 后端可执行文件所在的目录路径（用于自动启动）。      | 无                        |
 | `IDLE_TIMEOUT`         | 空闲超时时间（毫秒），超过此时间无活动则可能关闭后端服务。 | `300000` (5分钟)          |
 | `ENABLE_IDLE_SHUTDOWN` | 是否启用空闲超时自动关闭后端服务。                         | `true`                    |
+| `TEST_ARTIFACT_DIR`    | 测试仪表板工件和覆盖率报告的存储目录。                     | 系统临时目录              |
+| `GO_BINARY`            | Go 二进制文件路径，用于运行 Go 测试。                       | `go`                      |
+| `NODE_ENV`             | Node 环境模式（development/test/production）。             | `development`             |
+
+---
+
+## 测试仪表板
+
+PanSou MCP 服务包含一个测试仪表板模块，用于编排和监控测试执行。详细信息请参阅：
+
+- [测试仪表板完整文档](../typescript/README.md#test-dashboard)
+- [Dashboard API 参考](./TEST-DASHBOARD-API.md)
+- [快速参考](./DASHBOARD-QUICK-REFERENCE.md)

@@ -14,13 +14,18 @@ import {
   TestSummary
 } from './types.js'
 
+// Default timeout for test module execution (15 minutes)
 const DEFAULT_TIMEOUT_MS = 15 * 60 * 1000
 
+/**
+ * Configuration options for TestRunner initialization.
+ * All options are optional and have sensible defaults.
+ */
 export interface TestRunnerOptions {
-  artifactDir?: string
-  goBinary?: string
-  spawnFn?: SpawnFunction
-  now?: () => Date
+  artifactDir?: string     // Directory for test artifacts (default: system temp dir)
+  goBinary?: string        // Path to Go binary (default: 'go')
+  spawnFn?: SpawnFunction  // Custom spawn function for testing (default: child_process.spawn)
+  now?: () => Date         // Custom date function for testing (default: () => new Date())
 }
 
 interface RunProcessOptions {
@@ -41,6 +46,10 @@ interface RunProcessResult {
 
 type SpawnFunction = (command: string, args: string[], options: SpawnOptionsWithoutStdio) => ChildProcess
 
+/**
+ * Special error class used to distinguish user-initiated cancellation
+ * from other types of failures.
+ */
 class CancellationError extends Error {
   constructor(message = 'test run cancelled') {
     super(message)
@@ -48,6 +57,25 @@ class CancellationError extends Error {
   }
 }
 
+/**
+ * TestRunner orchestrates sequential execution of multiple test modules,
+ * aggregates results and coverage, and provides real-time status updates.
+ * 
+ * Features:
+ * - Sequential module execution with automatic retries on queue
+ * - Real-time event emissions for test lifecycle tracking
+ * - Coverage collection and aggregation from Go modules
+ * - Artifact persistence (test results, coverage profiles)
+ * - Cancellation support with cleanup
+ * - Automatic queue management to prevent concurrent runs
+ * 
+ * Usage:
+ * ```typescript
+ * const runner = new TestRunner(modules, { artifactDir: './artifacts' })
+ * runner.on('completed', (status) => console.log('Done!', status))
+ * await runner.trigger()
+ * ```
+ */
 export class TestRunner extends EventEmitter {
   private readonly modules: TestModuleDefinition[]
   private readonly store: TestStatusStore

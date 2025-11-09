@@ -1,5 +1,9 @@
 import { ModuleCoverageSummary, ModuleExecutionStatus, ModuleState, TestModuleDefinition, TestStatusSnapshot } from './types.js'
 
+/**
+ * Deep clone coverage data to ensure immutability of snapshots.
+ * Prevents external mutations from affecting internal state.
+ */
 function cloneCoverage(coverage: Record<string, ModuleCoverageSummary | null>): Record<string, ModuleCoverageSummary | null> {
   const cloned: Record<string, ModuleCoverageSummary | null> = {}
   for (const [key, value] of Object.entries(coverage)) {
@@ -8,6 +12,14 @@ function cloneCoverage(coverage: Record<string, ModuleCoverageSummary | null>): 
   return cloned
 }
 
+/**
+ * TestStatusStore manages the mutable state of a test run.
+ * It tracks the status of each module, aggregates coverage,
+ * and provides immutable snapshots of the current state.
+ * 
+ * This class ensures thread-safe state updates and prevents
+ * external mutations through defensive cloning in snapshot().
+ */
 export class TestStatusStore {
   private state: TestStatusSnapshot
   private readonly now: () => Date

@@ -17,7 +17,10 @@
         "IDLE_TIMEOUT": "300000",
         "ENABLE_IDLE_SHUTDOWN": "true",
         "PROJECT_ROOT_PATH": "C:\\full\\path\\to\\your\\project",
-        "ENABLED_PLUGINS": "labi,zhizhen,shandian,duoduo,muou,wanou"
+        "ENABLED_PLUGINS": "labi,zhizhen,shandian,duoduo,muou,wanou",
+        "TEST_ARTIFACT_DIR": "C:\\full\\path\\to\\your\\project\\test-artifacts",
+        "GO_BINARY": "go",
+        "NODE_ENV": "production"
       }
     }
   },
@@ -45,7 +48,10 @@
       "IDLE_TIMEOUT": "空闲超时时间（毫秒），默认300000（5分钟）",
       "ENABLE_IDLE_SHUTDOWN": "是否启用空闲自动关闭，默认true",
       "PROJECT_ROOT_PATH": "项目根目录路径，用于查找Go可执行文件",
-      "ENABLED_PLUGINS": "指定启用的插件列表，多个插件用逗号分隔，必须显式指定"
+      "ENABLED_PLUGINS": "指定启用的插件列表，多个插件用逗号分隔，必须显式指定",
+      "TEST_ARTIFACT_DIR": "测试仪表板工件和覆盖率报告的存储目录，默认为系统临时目录",
+      "GO_BINARY": "Go二进制文件路径，用于运行Go测试，默认为'go'",
+      "NODE_ENV": "Node环境模式（development/test/production），默认为development"
     },
     "使用示例": {
       "自动模式": "默认配置，自动检测部署方式",

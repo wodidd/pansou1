@@ -17,6 +17,50 @@ PanSou是一个高性能的网盘资源搜索API服务，支持TG搜索和自定
 
 PanSou 还提供了一个基于 [Model Context Protocol (MCP)](https://modelcontextprotocol.io) 的服务，可以将搜索功能集成到 Claude Desktop 等支持 MCP 的应用中。详情请参阅 [MCP 服务文档](docs/MCP-SERVICE.md)。
 
+## 测试仪表板
+
+PanSou 包含一个内置的测试仪表板模块，用于编排和监控 Go 和 TypeScript 测试套件的执行。该仪表板提供：
+
+- **自动化测试编排**：顺序执行 Go 和 Jest 测试模块
+- **实时状态跟踪**：监控测试执行状态和进度
+- **覆盖率聚合**：自动收集和汇总 Go 模块的测试覆盖率
+- **事件驱动 API**：订阅测试生命周期事件
+- **取消支持**：优雅地取消正在运行的测试
+- **队列管理**：自动排队并发测试请求
+
+详细文档请参阅：
+- [TypeScript README](typescript/README.md#test-dashboard) - 完整的仪表板使用指南
+- [Dashboard API Reference](docs/TEST-DASHBOARD-API.md) - HTTP API 端点和 SSE 集成
+
+### 快速开始
+
+```bash
+# 安装依赖
+cd typescript
+npm install
+
+# 运行仪表板测试
+npm test
+
+# 构建项目
+npm run build
+```
+
+### API 端点示例
+
+```bash
+# 获取当前测试状态
+curl http://localhost:8888/dashboard/status
+
+# 触发测试运行
+curl -X POST http://localhost:8888/dashboard/trigger
+
+# 订阅实时事件流 (SSE)
+curl -N http://localhost:8888/dashboard/events
+```
+
+更多信息，请参阅完整的 [测试仪表板文档](typescript/README.md#test-dashboard) 和 [API 参考](docs/TEST-DASHBOARD-API.md)。
+
 ## 支持的网盘类型
 
 百度网盘 (`baidu`)、阿里云盘 (`aliyun`)、夸克网盘 (`quark`)、天翼云盘 (`tianyi`)、UC网盘 (`uc`)、移动云盘 (`mobile`)、115网盘 (`115`)、PikPak (`pikpak`)、迅雷网盘 (`xunlei`)、123网盘 (`123`)、磁力链接 (`magnet`)、电驴链接 (`ed2k`)、其他 (`others`)
@@ -85,8 +129,28 @@ http://localhost:8888
 
 #### 环境要求
 
-- Go 1.18+
-- 可选：SOCKS5代理（用于访问受限地区的Telegram站点）
+- **Go** 1.18+ (后端服务)
+- **Node.js** 18.0.0+ (MCP 服务和测试仪表板)
+- **npm** (随 Node.js 安装)
+- 可选：**SOCKS5代理**（用于访问受限地区的Telegram站点）
+
+#### 依赖说明
+
+项目包含以下主要依赖：
+
+**Go 后端**:
+- `github.com/gin-gonic/gin` - HTTP 框架
+- `github.com/bytedance/sonic` - 高性能 JSON 序列化
+
+**TypeScript/MCP 服务**:
+- `@modelcontextprotocol/sdk` - MCP 协议实现
+- `axios` - HTTP 客户端
+- `zod` - 模式验证
+
+**测试仪表板**（开发依赖）:
+- `jest` - JavaScript 测试框架
+- `ts-jest` - TypeScript 预处理器
+- `@types/jest` - TypeScript 类型定义
 
 1. 克隆仓库
 
@@ -187,16 +251,36 @@ curl -X POST http://localhost:8888/api/search \
 
 </details>
 
-3. 构建
+3. 构建后端服务
 
-```linux
+```bash
+# Go 后端
 CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -ldflags="-s -w -extldflags '-static'" -o pansou .
 ```
 
-4. 运行
+4. 构建 MCP 服务和测试仪表板（可选）
 
 ```bash
+# 安装 TypeScript 依赖
+cd typescript
+npm install
+
+# 构建 MCP 服务
+npm run build
+
+# 运行测试仪表板单元测试
+npm test
+```
+
+5. 运行服务
+
+```bash
+# 启动 Go 后端服务
 ./pansou
+
+# 在另一个终端启动 MCP 服务（可选）
+cd typescript
+npm start
 ```
 
 ### 其他配置参考

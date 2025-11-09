@@ -1,28 +1,46 @@
 import { ModuleCoverageEntry, ModuleCoverageSummary, TestFailureDetail, TestSummary } from './types.js'
 
+/**
+ * Represents a single event from Go's test JSON output format.
+ * Go emits these events when tests are run with the -json flag.
+ * @see https://pkg.go.dev/cmd/test2json
+ */
 export interface GoTestJsonEvent {
   Action: 'run' | 'pass' | 'fail' | 'skip' | 'pause' | 'cont' | 'output'
-  Package?: string
-  Test?: string
-  Elapsed?: number
-  Output?: string
-  Time?: string
+  Package?: string   // Package being tested
+  Test?: string      // Test name (e.g., "TestMyFunction")
+  Elapsed?: number   // Elapsed time in seconds
+  Output?: string    // Test output line
+  Time?: string      // ISO timestamp
 }
 
+/**
+ * Parsed result from Go test JSON stream.
+ */
 export interface GoTestParseResult {
-  success: boolean
-  summary: TestSummary
-  failures: TestFailureDetail[]
-  elapsedMs?: number
+  success: boolean              // True if all tests passed
+  summary: TestSummary          // Aggregated test counts
+  failures: TestFailureDetail[] // Details of failed tests
+  elapsedMs?: number            // Total elapsed time in milliseconds
 }
 
+/**
+ * Parsed result from Jest JSON output.
+ */
 export interface JestParseResult {
-  success: boolean
-  summary: TestSummary
-  failures: TestFailureDetail[]
-  durationMs?: number
+  success: boolean              // True if all tests passed
+  summary: TestSummary          // Aggregated test counts
+  failures: TestFailureDetail[] // Details of failed tests
+  durationMs?: number           // Total duration in milliseconds
 }
 
+/**
+ * Parses Go test output in JSON format (from -json flag).
+ * Aggregates test counts and extracts failure details.
+ * 
+ * @param stream - Raw stdout from `go test -json`
+ * @returns Parsed test results with success status and failure details
+ */
 export function parseGoTestJson(stream: string): GoTestParseResult {
   const summary: TestSummary = {
     total: 0,
@@ -120,6 +138,15 @@ export function parseGoTestJson(stream: string): GoTestParseResult {
   }
 }
 
+/**
+ * Parses output from `go tool cover -func=<profile>`.
+ * Extracts coverage percentages for each package and calculates total coverage.
+ * 
+ * @param report - Raw output from go tool cover
+ * @param profilePath - Path to the coverage profile file (optional)
+ * @returns Aggregated coverage summary with per-package breakdown
+ * @throws Error if unable to parse coverage total
+ */
 export function parseGoCoverageReport(report: string, profilePath?: string): ModuleCoverageSummary {
   const entries: ModuleCoverageEntry[] = []
   let total: number | undefined
@@ -167,6 +194,13 @@ export function parseGoCoverageReport(report: string, profilePath?: string): Mod
   }
 }
 
+/**
+ * Parses Jest output in JSON format (from --json flag).
+ * Handles both single-line JSON and multi-line output where JSON is the last line.
+ * 
+ * @param output - Raw output from jest with --json flag
+ * @returns Parsed test results with success status and failure details
+ */
 export function parseJestJson(output: string): JestParseResult {
   const data = extractJsonPayload(output)
   if (!data) {

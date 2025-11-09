@@ -1,6 +1,25 @@
+# Dependencies
 node_modules/
 **/node_modules/
+
+# Build outputs
 **/dist/
+pansou
+main
+
+# OS files
 .DS_Store
+
+# Test artifacts
 coverage/
+test-artifacts/
+*-cover.out
+*.test
+.test-cache/
+
+# Logs
 *.log
+
+# Environment
+.env
+.env.local
