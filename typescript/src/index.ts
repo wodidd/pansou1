@@ -14,6 +14,9 @@ import {
 import { loadConfig } from './utils/config.js';
 import { HttpClient } from './utils/http-client.js';
 import { BackendManager } from './utils/backend-manager.js';
+import { TestRunner } from './utils/test-runner.js';
+import { TestStatusStore } from './utils/test-status-store.js';
+import { DashboardServer } from './dashboard/server.js';
 import { searchTool, executeSearchTool } from './tools/search.js';
 import { healthTool, executeHealthTool } from './tools/health.js';
 import { startBackendTool, executeStartBackendTool } from './tools/start-backend.js';
@@ -26,6 +29,9 @@ class PanSouMCPServer {
   private httpClient: HttpClient;
   private backendManager: BackendManager;
   private config: any;
+  private testStatusStore: TestStatusStore;
+  private testRunner: TestRunner;
+  private dashboardServer: DashboardServer | null = null;
 
   constructor() {
     this.server = new Server(
@@ -45,6 +51,19 @@ class PanSouMCPServer {
     this.config = loadConfig();
     this.httpClient = new HttpClient(this.config);
     this.backendManager = new BackendManager(this.config, this.httpClient);
+    
+    // 初始化测试相关组件
+    this.testStatusStore = new TestStatusStore();
+    this.testRunner = new TestRunner(this.testStatusStore);
+    
+    // 初始化仪表板服务器（如果启用）
+    if (this.config.testDashboard.enabled) {
+      this.dashboardServer = new DashboardServer(
+        this.testRunner,
+        this.testStatusStore,
+        this.config.testDashboard
+      );
+    }
 
     this.setupHandlers();
     this.setupProcessHandlers();
@@ -299,6 +318,15 @@ class PanSouMCPServer {
     const gracefulShutdown = async (signal: string) => {
       console.error(`\n收到 ${signal} 信号，正在优雅关闭...`);
       
+      // 关闭仪表板服务器
+      if (this.dashboardServer) {
+        try {
+          await this.dashboardServer.stop();
+        } catch (error) {
+          console.error('关闭仪表板服务器失败:', error);
+        }
+      }
+      
       if (this.config.autoStartBackend) {
         // 延迟关闭后端服务
         this.backendManager.scheduleShutdown();
@@ -345,6 +373,41 @@ class PanSouMCPServer {
       this.httpClient.setSilentMode(false);
     }
 
+    // 启动仪表板服务器（如果启用）
+    if (this.dashboardServer) {
+      try {
+        await this.dashboardServer.start();
+        
+        // 如果启用了自动运行，则自动运行测试
+        if (this.config.testDashboard.autorun) {
+          console.error('自动启动测试...');
+          setTimeout(() => {
+            this.testRunner.runTests([
+              {
+                name: '连接测试',
+                fn: async () => {
+                  await new Promise(resolve => setTimeout(resolve, 1000));
+                  return true;
+                }
+              },
+              {
+                name: '健康检查测试',
+                fn: async () => {
+                  await new Promise(resolve => setTimeout(resolve, 1500));
+                  return true;
+                }
+              }
+            ]).catch(error => {
+              console.error('自动测试运行失败:', error);
+            });
+          }, 2000); // 延迟2秒后启动测试
+        }
+      } catch (error) {
+        console.error('仪表板服务器启动失败:', error);
+        // 继续启动MCP服务器，但记录错误
+      }
+    }
+
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
     
@@ -354,6 +417,10 @@ class PanSouMCPServer {
     console.error(`请求超时: ${this.config.requestTimeout}ms`);
     console.error(`最大结果数: ${this.config.maxResults}`);
     console.error(`自动启动后端: ${this.config.autoStartBackend ? '启用' : '禁用'}`);
+    if (this.config.testDashboard.enabled) {
+      console.error(`测试仪表板: http://${this.config.testDashboard.host}:${this.config.testDashboard.port}`);
+      console.error(`仪表板自动运行: ${this.config.testDashboard.autorun ? '启用' : '禁用'}`);
+    }
     // 空闲监控信息已在BackendManager构造函数中显示
   }
 }

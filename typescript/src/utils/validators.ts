@@ -56,7 +56,15 @@ export const ConfigSchema = z.object({
   // 项目根目录路径
   projectRootPath: z.string().optional(),
   // Docker部署模式（当设置为true时，不会尝试启动本地进程）
-  dockerMode: z.boolean().default(false)
+  dockerMode: z.boolean().default(false),
+  // 测试仪表板配置
+  testDashboard: z.object({
+    enabled: z.boolean().default(false),
+    host: z.string().default('localhost'),
+    port: z.number().positive().default(3001),
+    staticPath: z.string().optional(),
+    autorun: z.boolean().default(false)
+  }).default({})
 });
 
 /**

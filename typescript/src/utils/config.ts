@@ -37,7 +37,15 @@ export function loadConfig(): Config {
     // 项目根目录路径
     projectRootPath: process.env.PROJECT_ROOT_PATH,
     // Docker部署模式
-    dockerMode: process.env.DOCKER_MODE === 'true'
+    dockerMode: process.env.DOCKER_MODE === 'true',
+    // 测试仪表板配置
+    testDashboard: process.env.TEST_DASHBOARD_ENABLED || process.env.TEST_DASHBOARD_HOST || process.env.TEST_DASHBOARD_PORT || process.env.TEST_DASHBOARD_STATIC_PATH || process.env.TEST_DASHBOARD_AUTORUN ? {
+      enabled: process.env.TEST_DASHBOARD_ENABLED !== 'false',
+      host: process.env.TEST_DASHBOARD_HOST,
+      port: process.env.TEST_DASHBOARD_PORT ? parseInt(process.env.TEST_DASHBOARD_PORT) : undefined,
+      staticPath: process.env.TEST_DASHBOARD_STATIC_PATH,
+      autorun: process.env.TEST_DASHBOARD_AUTORUN === 'true'
+    } : undefined
   };
 
   // 移除undefined值，让zod使用默认值
