@@ -1,0 +1,14 @@
+# Go build artifacts
+bin/
+*.exe
+*.test
+*.out
+coverage.out
+
+# Node and TypeScript dependencies/build outputs
+node_modules/
+typescript/node_modules/
+typescript/dist/
+
+# OS/editor noise
+.DS_Store
