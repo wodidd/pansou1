@@ -609,6 +609,59 @@ curl http://localhost:8888/api/health
 - `channels_count`: 配置的频道数量
 - `channels`: 配置的频道列表
 
+## 🧪 开发与测试
+
+### 运行测试
+
+本项目使用 Go 的内置测试框架和 testify 断言库。要运行测试套件：
+
+```bash
+# 运行所有测试
+go test ./...
+
+# 运行测试并显示详细输出
+go test -v ./...
+
+# 运行测试并生成覆盖率报告
+go test -cover ./...
+go test -coverprofile=coverage.out ./...
+go tool cover -html=coverage.out
+```
+
+### 测试工具包
+
+项目提供了 `internal/testutil` 包，包含以下测试辅助工具：
+
+- **配置管理**：`SetupTestConfig()` - 创建隔离的测试配置和临时缓存目录
+- **测试夹具**：`SampleSearchResult()`, `SampleSearchResults()` - 生成测试数据
+- **插件桩件**：`NewStubPlugin()`, `CreateTestPluginManager()` - 创建测试用插件
+- **环境变量**：`WithCustomEnv()` - 临时设置环境变量
+
+示例：
+
+```go
+func TestMyFunction(t *testing.T) {
+    // 设置测试配置（自动清理）
+    _, cleanup := testutil.SetupTestConfig(t)
+    defer cleanup()
+    
+    // 创建测试数据
+    result := testutil.SampleSearchResult("test")
+    
+    // 测试代码...
+}
+```
+
+详细文档请参阅 [CONTRIBUTING.md](CONTRIBUTING.md)。
+
+### 持续集成
+
+项目使用 GitHub Actions 进行持续集成：
+- ✅ 在多个 Go 版本（1.18-1.23）上运行测试
+- ✅ 执行代码检查（go vet）
+- ✅ 生成测试覆盖率报告
+- ✅ 验证构建成功
+
 ## 📄 许可证
 
 本项目采用 MIT 许可证。详情请见 [LICENSE](LICENSE) 文件。
