@@ -1,0 +1,50 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool
+*.out
+coverage.txt
+*.coverprofile
+
+# Dependency directories
+vendor/
+
+# Go workspace file
+go.work
+
+# IDE specific files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS specific files
+.DS_Store
+Thumbs.db
+
+# Application specific
+cache/
+*.log
+pansou
+pansou-*
+
+# Environment files
+.env
+.env.local
+
+# Temporary test files
+**/testdata/temp/
+**/*-test-cache-*
+
+# Node.js dependencies (for TypeScript MCP server)
+node_modules/
+typescript/node_modules/
+typescript/dist/
